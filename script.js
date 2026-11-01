@@ -11,7 +11,8 @@
     birthdayMonth: 12,             // 1 = January ... 12 = December
     birthdayDay: 14,
     togetherSince: '2022-02-14T00:00:00', // when you got together (local time)
-    musicVolume: 0.5,              // 0 to 1
+    musicVolume: 50,               // 0 to 100
+    youtubeId: 'uQdl3d9LomM',      // song: youtu.be/uQdl3d9LomM
     gameTarget: 10                 // points needed to win the voucher
   };
 
@@ -232,17 +233,17 @@
     $('#celebrateBtn').addEventListener('click', celebrate);
   }
 
-  /* ---------- 8. Music widget ---------- */
+  /* ---------- 8. Music widget (YouTube) ---------- */
   function initMusic() {
-    const audio = $('#bgMusic');
     const btn = $('#musicBtn');
     const widget = $('#musicWidget');
     const bubble = $('#musicBubble');
-    const unlockEvents = ['pointerdown', 'pointerup', 'keydown', 'click'];
-    let userPaused = false;
+    const unlockEvents = ['pointerdown', 'keydown'];
+    let player = null;
+    let ready = false;
     let broken = false;
-
-    audio.volume = CONFIG.musicVolume;
+    let wantPlay = false;
+    let userPaused = false;
 
     const setPlaying = (playing) => {
       widget.classList.toggle('is-playing', playing);
@@ -255,53 +256,92 @@
       bubble.classList.remove('is-hidden');
     };
 
-    const play = async () => {
-      if (broken) return false;
-      try {
-        await audio.play();
-        bubble.classList.add('is-hidden');
-        return true;
-      } catch (err) {
-        setPlaying(false);
-        return false;
-      }
+    const isPlaying = () => ready && player.getPlayerState() === window.YT.PlayerState.PLAYING;
+
+    const play = () => {
+      if (broken) return;
+      wantPlay = true;
+      if (ready) player.playVideo();
+    };
+
+    const pause = () => {
+      wantPlay = false;
+      if (ready) player.pauseVideo();
     };
 
     const removeUnlock = () => unlockEvents.forEach((t) => document.removeEventListener(t, unlock, true));
 
+    // Browsers block autoplay, so start the song on the first tap or key press.
     function unlock(e) {
       if (e.target instanceof Element && e.target.closest('#musicBtn')) return;
       removeUnlock();
-      if (!userPaused && audio.paused) play();
+      if (!userPaused) play();
     }
 
     btn.addEventListener('click', () => {
       if (broken) {
-        showBubble('Add bg-music.mp3 next to index.html 🎵');
+        showBubble('Song unavailable 🎵');
         return;
       }
-      if (audio.paused) {
+      removeUnlock();
+      if (isPlaying() || (!ready && wantPlay)) {
+        userPaused = true;
+        pause();
+        setPlaying(false);
+      } else {
         userPaused = false;
         play();
-      } else {
-        userPaused = true;
-        audio.pause();
       }
     });
 
-    audio.addEventListener('play', () => setPlaying(true));
-    audio.addEventListener('pause', () => setPlaying(false));
-    audio.addEventListener('error', () => {
-      broken = true;
-      setPlaying(false);
-      removeUnlock();
-      showBubble('Music file not found 🎵');
-    });
+    unlockEvents.forEach((t) => document.addEventListener(t, unlock, true));
 
-    // Try autoplay; browsers usually block it, so start on the first tap or key press instead.
-    play().then((ok) => {
-      if (!ok && !broken) unlockEvents.forEach((t) => document.addEventListener(t, unlock, true));
-    });
+    window.onYouTubeIframeAPIReady = () => {
+      player = new window.YT.Player('ytPlayer', {
+        width: 200,
+        height: 200,
+        videoId: CONFIG.youtubeId,
+        playerVars: {
+          autoplay: 0,
+          controls: 0,
+          loop: 1,
+          playlist: CONFIG.youtubeId,
+          playsinline: 1,
+          rel: 0
+        },
+        events: {
+          onReady: () => {
+            ready = true;
+            player.setVolume(CONFIG.musicVolume);
+            if (wantPlay) player.playVideo();
+          },
+          onStateChange: (e) => {
+            const S = window.YT.PlayerState;
+            if (e.data === S.PLAYING) {
+              setPlaying(true);
+              bubble.classList.add('is-hidden');
+            } else if (e.data === S.PAUSED || e.data === S.ENDED) {
+              setPlaying(false);
+            }
+          },
+          onError: () => {
+            broken = true;
+            setPlaying(false);
+            removeUnlock();
+            showBubble('Song unavailable 🎵');
+          }
+        }
+      });
+    };
+
+    const tag = document.createElement('script');
+    tag.src = 'https://www.youtube.com/iframe_api';
+    tag.onerror = () => {
+      broken = true;
+      removeUnlock();
+      showBubble('Could not load the song 🎵');
+    };
+    document.head.appendChild(tag);
   }
 
   /* ---------- 9. Modal ---------- */
