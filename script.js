@@ -7,11 +7,11 @@
 
   /* ---------- 1. Personalize here ---------- */
   const CONFIG = {
-    name: 'Sweetheart',            // her name or nickname
+    name: 'Esther',            // her name or nickname
     birthdayMonth: 11,             // 1 = January ... 12 = December
     birthdayDay: 10,
     togetherSince: '2026-09-01T00:00:00', // when you got together (local time)
-    musicVolume: 50,               // 0 to 100
+    musicVolume: 30,               // 0 to 100
     youtubeId: 'uQdl3d9LomM',      // song: youtu.be/uQdl3d9LomM
     gameTarget: 10                 // points needed to win the voucher
   };
@@ -23,7 +23,7 @@
     'You are kind in ways most people never notice, but I always do. 💗',
     'You make me want to be a better person every single day. 🌷',
     'Home is not a place. It is wherever you are. 🏡',
-    'You look beautiful in everything, especially my hoodies. 🧸',
+    'You look beautiful in everything. 🧸',
     'Your hugs fix things I did not even know were broken. 🤗',
     'You are smarter than you give yourself credit for. 🧠',
     'I fall for you a little more every time you get excited about food. 🍰',
@@ -37,9 +37,9 @@
     'You make the world softer just by being in it. ☁️',
     'I love how your eyes light up when you talk about things you love. 🌟',
     'You are proof that dreams come true. 💫',
-    'Even your silly dance moves are perfect to me. 💃',
+    'Even your silly jokes are perfect to me. 💃',
     'You are my calm on chaotic days. 🌊',
-    'I love you more than coffee. And that is saying a lot. ☕',
+    'I love you more than cats. And that is saying a lot. 🐱',
     'Every love song suddenly makes sense because of you. 🎵',
     'You are strong, gentle and absolutely wonderful. 🌹',
     'Your hand fits perfectly in mine. 🤝',
