@@ -793,33 +793,6 @@
     updateHud();
   }
 
-  /* ---------- 12. Memory gallery ---------- */
-  function initGallery() {
-    $$('.polaroid').forEach((card) => {
-      const toggle = () => {
-        const flipped = card.classList.toggle('is-flipped');
-        card.setAttribute('aria-pressed', String(flipped));
-      };
-
-      card.addEventListener('click', toggle);
-      card.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          toggle();
-        }
-      });
-
-      // Show a cute placeholder until the real photo is added
-      const img = card.querySelector('img');
-      const photo = card.querySelector('.photo');
-      const markMissing = () => photo.classList.add('is-missing');
-      if (img) {
-        if (img.complete && img.naturalWidth === 0) markMissing();
-        img.addEventListener('error', markMissing);
-      }
-    });
-  }
-
   /* ---------- 13. Love note jar ---------- */
   function popHearts(el) {
     if (reduceMotion) return;
@@ -992,7 +965,6 @@
   initMusic();
   initCake();
   initGame();
-  initGallery();
   initJar();
   initBgHearts();
   initTrail();
