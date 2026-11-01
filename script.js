@@ -10,7 +10,7 @@
     name: 'Sweetheart',            // her name or nickname
     birthdayMonth: 12,             // 1 = January ... 12 = December
     birthdayDay: 14,
-    togetherSince: '2022-02-14T00:00:00', // when you got together (local time)
+    togetherSince: '2026-09-01T00:00:00', // when you got together (local time)
     musicVolume: 50,               // 0 to 100
     youtubeId: 'uQdl3d9LomM',      // song: youtu.be/uQdl3d9LomM
     gameTarget: 10                 // points needed to win the voucher
