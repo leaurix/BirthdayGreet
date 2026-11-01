@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="A little birthday surprise, made with love.">
+  <meta name="theme-color" content="#FFB6C1">
+  <title>Happy Birthday 💖</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Poppins:wght@300;400;500;600&family=Sacramento&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css">
+
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js" defer></script>
+  <script src="script.js" defer></script>
+</head>
+<body>
+
+  <!-- Floating hearts background (filled by script.js) -->
+  <div class="bg-hearts" id="bgHearts" aria-hidden="true"></div>
+
+  <!-- Top navigation -->
+  <nav class="nav glass" aria-label="Sections">
+    <a href="#home" class="is-active">Home</a>
+    <a href="#wish">Cake</a>
+    <a href="#game">Game</a>
+    <a href="#memories">Memories</a>
+    <a href="#love">Love Notes</a>
+  </nav>
+
+  <!-- 1. Hero header and greeting -->
+  <header class="hero" id="home">
+    <div class="hero-card glass">
+      <p class="hero-eyebrow">✨ today is all about you ✨</p>
+
+      <h1 class="hero-title" id="heroTitle">
+        <span class="grad" id="typedText"></span><span class="caret" aria-hidden="true"></span>
+        <span class="hero-emoji" id="heroEmoji" aria-hidden="true">💖</span>
+      </h1>
+
+      <p class="hero-sub" id="heroSub">The whole world celebrates you today, and so do I.</p>
+
+      <div class="countdown-tabs" role="tablist" aria-label="Countdown mode">
+        <button class="tab is-active" type="button" role="tab" aria-selected="true" data-mode="birthday">Until your birthday</button>
+        <button class="tab" type="button" role="tab" aria-selected="false" data-mode="together">Our time together</button>
+      </div>
+
+      <p class="countdown-label" id="countdownLabel" aria-live="polite">Counting down to your special day</p>
+
+      <div class="countdown" id="countdown">
+        <div class="time-box"><span class="time-num" id="cdDays">00</span><span class="time-unit">Days</span></div>
+        <div class="time-box"><span class="time-num" id="cdHours">00</span><span class="time-unit">Hours</span></div>
+        <div class="time-box"><span class="time-num" id="cdMinutes">00</span><span class="time-unit">Minutes</span></div>
+        <div class="time-box"><span class="time-num" id="cdSeconds">00</span><span class="time-unit">Seconds</span></div>
+      </div>
+
+      <button class="btn btn-primary btn-celebrate" id="celebrateBtn" type="button">🎉 Celebrate!</button>
+    </div>
+
+    <a href="#wish" class="scroll-hint">scroll for surprises ↓</a>
+  </header>
+
+  <main>
+
+    <!-- 3. Interactive birthday cake -->
+    <section class="section" id="wish">
+      <div class="section-head reveal">
+        <span class="section-kicker">Make a wish</span>
+        <h2 class="section-title"><span class="grad">Blow out your candles</span> 🕯️</h2>
+        <p class="section-text">Close your eyes, make a wish, then tap each candle to blow it out.</p>
+      </div>
+
+      <div class="cake-stage glass reveal">
+        <div class="cake">
+          <div class="candles">
+            <button class="candle" type="button" aria-label="Blow out candle 1"><span class="wick"></span><span class="flame"></span></button>
+            <button class="candle" type="button" aria-label="Blow out candle 2"><span class="wick"></span><span class="flame"></span></button>
+            <button class="candle" type="button" aria-label="Blow out candle 3"><span class="wick"></span><span class="flame"></span></button>
+            <button class="candle" type="button" aria-label="Blow out candle 4"><span class="wick"></span><span class="flame"></span></button>
+            <button class="candle" type="button" aria-label="Blow out candle 5"><span class="wick"></span><span class="flame"></span></button>
+          </div>
+          <div class="cake-layer layer-top"><span class="frosting"></span></div>
+          <div class="cake-layer layer-middle"><span class="frosting"></span></div>
+          <div class="cake-layer layer-bottom"><span class="frosting"></span></div>
+          <div class="plate"></div>
+        </div>
+
+        <p class="candle-status" id="candleStatus" aria-live="polite">5 candles still glowing ✨ Make a wish!</p>
+        <button class="btn btn-ghost" id="relightBtn" type="button" hidden>Relight the candles 🔥</button>
+      </div>
+    </section>
+
+    <!-- 4. Heart Catcher mini-game -->
+    <section class="section" id="game">
+      <div class="section-head reveal">
+        <span class="section-kicker">Play a little</span>
+        <h2 class="section-title"><span class="grad">Heart Catcher</span> 🧺</h2>
+        <p class="section-text">Catch 10 sweet treats to unlock a secret surprise. Watch out for the broken hearts!</p>
+      </div>
+
+      <div class="game-wrap glass reveal">
+        <div class="game-hud">
+          <div class="hud-pill">💖 Score: <strong id="score">0</strong> / 10</div>
+          <div class="hud-pill">Lives: <strong id="lives" aria-label="3 lives left">❤️❤️❤️</strong></div>
+        </div>
+
+        <div class="score-bar" id="scoreBar" role="progressbar" aria-label="Progress to the surprise" aria-valuemin="0" aria-valuemax="10" aria-valuenow="0">
+          <span class="score-fill" id="scoreFill"></span>
+        </div>
+
+        <div class="game-area" id="gameArea">
+          <canvas id="gameCanvas" tabindex="0" aria-label="Heart Catcher game. Use the arrow keys, mouse or touch to move the basket."></canvas>
+
+          <div class="game-overlay" id="gameOverlay">
+            <span class="overlay-emoji" id="overlayEmoji" aria-hidden="true">🧺</span>
+            <h3 id="overlayTitle">Ready to play?</h3>
+            <p id="overlayText">Move the basket to catch hearts, sweets and flowers. Each broken heart costs a life.</p>
+            <button class="btn btn-primary" id="gameStartBtn" type="button">Start Game 💕</button>
+          </div>
+        </div>
+
+        <p class="game-help">Desktop: mouse or ← → keys · Mobile: drag your finger</p>
+      </div>
+
+      <div class="voucher" id="voucher" hidden>
+        <div class="voucher-inner">
+          <span class="voucher-tag">🎁 Secret Surprise Voucher</span>
+          <h3 class="voucher-title">Good for 1 Free Dinner Date of your choice! 🍝</h3>
+          <p class="voucher-fine">No expiry · Unlimited dessert · Redeemable with one kiss</p>
+          <p class="voucher-code">CODE: <strong>ILOVEYOU</strong></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. Memory lane gallery -->
+    <section class="section" id="memories">
+      <div class="section-head reveal">
+        <span class="section-kicker">Our story</span>
+        <h2 class="section-title"><span class="grad">Memory Lane</span> 📸</h2>
+        <p class="section-text">Hover or tap each photo to flip it over.</p>
+      </div>
+
+      <div class="gallery reveal">
+        <div class="polaroid" role="button" tabindex="0" aria-pressed="false" aria-label="Memory 1, flip to read">
+          <div class="polaroid-inner">
+            <div class="polaroid-face polaroid-front">
+              <div class="photo">
+                <img src="photo1.jpg" alt="Our first date" loading="lazy">
+                <span class="photo-fallback" aria-hidden="true">💕<small>photo1.jpg</small></span>
+              </div>
+              <span class="sticker">Our first date 💕</span>
+            </div>
+            <div class="polaroid-face polaroid-back">
+              <p class="memory-date">The very beginning</p>
+              <p class="memory-text">I was so nervous I almost forgot my wallet, but the moment you smiled at me, everything felt easy.</p>
+              <span class="memory-heart" aria-hidden="true">💗</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="polaroid" role="button" tabindex="0" aria-pressed="false" aria-label="Memory 2, flip to read">
+          <div class="polaroid-inner">
+            <div class="polaroid-face polaroid-front">
+              <div class="photo">
+                <img src="photo2.jpg" alt="Our first trip together" loading="lazy">
+                <span class="photo-fallback" aria-hidden="true">✈️<small>photo2.jpg</small></span>
+              </div>
+              <span class="sticker">First trip ✈️</span>
+            </div>
+            <div class="polaroid-face polaroid-back">
+              <p class="memory-date">Adventure time</p>
+              <p class="memory-text">Getting lost with you turned out to be the best part of the whole trip.</p>
+              <span class="memory-heart" aria-hidden="true">🗺️</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="polaroid" role="button" tabindex="0" aria-pressed="false" aria-label="Memory 3, flip to read">
+          <div class="polaroid-inner">
+            <div class="polaroid-face polaroid-front">
+              <div class="photo">
+                <img src="photo3.jpg" alt="Us making silly faces" loading="lazy">
+                <span class="photo-fallback" aria-hidden="true">🤪<small>photo3.jpg</small></span>
+              </div>
+              <span class="sticker">Silly us 🤪</span>
+            </div>
+            <div class="polaroid-face polaroid-back">
+              <p class="memory-date">Pure goofiness</p>
+              <p class="memory-text">You are the only person I can be completely ridiculous with, and you love me anyway.</p>
+              <span class="memory-heart" aria-hidden="true">😂</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="polaroid" role="button" tabindex="0" aria-pressed="false" aria-label="Memory 4, flip to read">
+          <div class="polaroid-inner">
+            <div class="polaroid-face polaroid-front">
+              <div class="photo">
+                <img src="photo4.jpg" alt="A sunset walk together" loading="lazy">
+                <span class="photo-fallback" aria-hidden="true">🌅<small>photo4.jpg</small></span>
+              </div>
+              <span class="sticker">Sunset walks 🌅</span>
+            </div>
+            <div class="polaroid-face polaroid-back">
+              <p class="memory-date">Golden hour</p>
+              <p class="memory-text">I don't remember the colors of the sky that evening. I only remember how you looked at me.</p>
+              <span class="memory-heart" aria-hidden="true">🌇</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="polaroid" role="button" tabindex="0" aria-pressed="false" aria-label="Memory 5, flip to read">
+          <div class="polaroid-inner">
+            <div class="polaroid-face polaroid-front">
+              <div class="photo">
+                <img src="photo5.jpg" alt="A cozy movie night" loading="lazy">
+                <span class="photo-fallback" aria-hidden="true">🍿<small>photo5.jpg</small></span>
+              </div>
+              <span class="sticker">Cozy nights 🍿</span>
+            </div>
+            <div class="polaroid-face polaroid-back">
+              <p class="memory-date">Blanket fort era</p>
+              <p class="memory-text">Movie marathons, warm blankets and you falling asleep on my shoulder. My favorite kind of night.</p>
+              <span class="memory-heart" aria-hidden="true">🌙</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="polaroid" role="button" tabindex="0" aria-pressed="false" aria-label="Memory 6, flip to read">
+          <div class="polaroid-inner">
+            <div class="polaroid-face polaroid-front">
+              <div class="photo">
+                <img src="photo6.jpg" alt="Us, together" loading="lazy">
+                <span class="photo-fallback" aria-hidden="true">💞<small>photo6.jpg</small></span>
+              </div>
+              <span class="sticker">Us, always 💞</span>
+            </div>
+            <div class="polaroid-face polaroid-back">
+              <p class="memory-date">Forever and counting</p>
+              <p class="memory-text">Every photo with you is my favorite photo. Here's to a million more.</p>
+              <span class="memory-heart" aria-hidden="true">♾️</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6. Compliment and love note jar -->
+    <section class="section" id="love">
+      <div class="section-head reveal">
+        <span class="section-kicker">Just because</span>
+        <h2 class="section-title"><span class="grad">Little Love Notes</span> 🍬</h2>
+        <p class="section-text">Every tap opens a new reason I adore you.</p>
+      </div>
+
+      <div class="jar-stage glass reveal">
+        <button class="jar" id="jarBtn" type="button" aria-label="Open the love jar for a new love note">
+          <span class="jar-lid"></span>
+          <span class="jar-body">
+            <span class="candy c1"></span><span class="candy c2"></span><span class="candy c3"></span>
+            <span class="candy c4"></span><span class="candy c5"></span><span class="candy c6"></span>
+            <span class="candy c7"></span><span class="candy c8"></span><span class="candy c9"></span>
+            <span class="candy c10"></span>
+          </span>
+          <span class="jar-label">Open me 💗</span>
+        </button>
+
+        <div class="note-card" id="noteCard" aria-live="polite">
+          <p class="note-kicker">Love note #<span id="noteNumber">0</span></p>
+          <p class="note-text" id="noteText">Tap the jar for a little love note 💌</p>
+        </div>
+
+        <p class="jar-counter">You've opened <strong id="openCount">0</strong> love notes</p>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    <p class="footer-script">Happy birthday, <span class="js-name">Sweetheart</span></p>
+    <p>Made with 💖 just for you · <span id="year">2026</span></p>
+  </footer>
+
+  <!-- 2. Floating music widget -->
+  <div class="music-widget" id="musicWidget">
+    <span class="music-bubble" id="musicBubble">Tap for our song 🎶</span>
+    <div class="notes" aria-hidden="true"><span>♪</span><span>♫</span><span>♬</span></div>
+    <div class="visualizer" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
+    <button class="music-btn" id="musicBtn" type="button" aria-label="Play music" aria-pressed="false">
+      <svg class="music-heart" viewBox="0 0 32 29" aria-hidden="true">
+        <defs>
+          <linearGradient id="heartGrad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#FF9ECF"/>
+            <stop offset="55%" stop-color="#FF69B4"/>
+            <stop offset="100%" stop-color="#B76E79"/>
+          </linearGradient>
+        </defs>
+        <path d="M23.6 0c-3.4 0-6.3 2.7-7.6 5.6C14.7 2.7 11.8 0 8.4 0 3.8 0 0 3.8 0 8.4c0 9.4 9.5 11.9 16 20.6 6.1-8.7 16-11.5 16-20.6C32 3.8 28.2 0 23.6 0z"/>
+      </svg>
+      <svg class="music-icon icon-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.2-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z"/></svg>
+      <svg class="music-icon icon-pause" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="5" width="4.2" height="14" rx="1.5"/><rect x="13.8" y="5" width="4.2" height="14" rx="1.5"/></svg>
+    </button>
+    <audio id="bgMusic" src="bg-music.mp3" loop preload="auto"></audio>
+  </div>
+
+  <!-- Love letter modal (opens when all candles are out) -->
+  <div class="modal" id="letterModal" role="dialog" aria-modal="true" aria-labelledby="letterTitle" hidden>
+    <div class="modal-backdrop" data-close></div>
+    <article class="modal-card letter">
+      <button class="modal-close" type="button" aria-label="Close letter" data-close>×</button>
+      <p class="letter-seal" aria-hidden="true">💌</p>
+      <h2 class="letter-title" id="letterTitle">To my dearest <span class="js-name">Sweetheart</span>,</h2>
+      <div class="letter-body">
+        <p>Happy birthday, my love. I wanted to make you something a little different this year, something you could tap and play with and smile at, because making you smile is honestly my favorite hobby.</p>
+        <p>Every day with you feels like a small miracle I didn't know I was allowed to have. You turn ordinary moments golden: grocery runs, late night talks, the way you laugh at your own jokes before you even finish telling them. I notice all of it, and I treasure all of it.</p>
+        <p>Thank you for your patience on my difficult days, for believing in me when I forget how to believe in myself, and for loving me in a way that feels like coming home. You are the kindest, most beautiful person I know, inside and out.</p>
+        <p>On your birthday, I hope you feel as loved as you truly are. I hope this year brings you every dream you whisper about, every adventure you deserve, and a hundred reasons to laugh until your cheeks hurt. And I hope I get to be right beside you for all of it.</p>
+        <p>No matter how many birthdays we celebrate together, I will always be grateful for the day you were born. The world got so much brighter that day, and so did my life the day you walked into it.</p>
+      </div>
+      <p class="letter-sign">Forever and always yours,<br><span>Me 💕</span></p>
+    </article>
+  </div>
+
+</body>
+</html>
