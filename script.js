@@ -13,7 +13,8 @@
     togetherSince: '2026-09-01T00:00:00', // when you got together (local time)
     musicVolume: 30,               // 0 to 100
     youtubeId: 'uQdl3d9LomM',      // song: youtu.be/uQdl3d9LomM
-    gameTarget: 10                 // points needed to win the voucher
+    gameTarget: 10,                // points needed to win the voucher
+    unlockAt: '2026-11-10T00:00:00+09:00' // page stays locked until this moment (midnight Korea time, KST)
   };
 
   const COMPLIMENTS = [
@@ -238,12 +239,10 @@
     const btn = $('#musicBtn');
     const widget = $('#musicWidget');
     const bubble = $('#musicBubble');
-    const unlockEvents = ['pointerdown', 'keydown'];
     let player = null;
     let ready = false;
     let broken = false;
     let wantPlay = false;
-    let userPaused = false;
 
     const setPlaying = (playing) => {
       widget.classList.toggle('is-playing', playing);
@@ -269,32 +268,19 @@
       if (ready) player.pauseVideo();
     };
 
-    const removeUnlock = () => unlockEvents.forEach((t) => document.removeEventListener(t, unlock, true));
-
-    // Browsers block autoplay, so start the song on the first tap or key press.
-    function unlock(e) {
-      if (e.target instanceof Element && e.target.closest('#musicBtn')) return;
-      removeUnlock();
-      if (!userPaused) play();
-    }
-
+    // Music only starts when the heart button is clicked. No autoplay.
     btn.addEventListener('click', () => {
       if (broken) {
         showBubble('Song unavailable 🎵');
         return;
       }
-      removeUnlock();
       if (isPlaying() || (!ready && wantPlay)) {
-        userPaused = true;
         pause();
         setPlaying(false);
       } else {
-        userPaused = false;
         play();
       }
     });
-
-    unlockEvents.forEach((t) => document.addEventListener(t, unlock, true));
 
     window.onYouTubeIframeAPIReady = () => {
       player = new window.YT.Player('ytPlayer', {
@@ -327,7 +313,6 @@
           onError: () => {
             broken = true;
             setPlaying(false);
-            removeUnlock();
             showBubble('Song unavailable 🎵');
           }
         }
@@ -338,7 +323,6 @@
     tag.src = 'https://www.youtube.com/iframe_api';
     tag.onerror = () => {
       broken = true;
-      removeUnlock();
       showBubble('Could not load the song 🎵');
     };
     document.head.appendChild(tag);
@@ -997,7 +981,61 @@
       .forEach((section) => navObserver.observe(section));
   }
 
-  /* ---------- 17. Start everything ---------- */
+  /* ---------- 17. Lock screen ---------- */
+  function initLock(unlockDate) {
+    const els = { d: $('#lkDays'), h: $('#lkHours'), m: $('#lkMinutes'), s: $('#lkSeconds') };
+    const gift = $('.lock-gift');
+    const tease = $('#lockTease');
+    const TEASES = [
+      'Patience, my love 💕',
+      'Nice try, cutie 😝',
+      'It is still wrapped 🎁',
+      'Soon, I promise 🤞',
+      'Go to sleep and dream of me 🌙',
+      'The bow is too tight 🎀',
+      'Still locked. Still love you 💖'
+    ];
+
+    $('#lockDate').textContent = unlockDate.toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'Asia/Seoul' });
+    document.title = `A surprise for ${CONFIG.name} 🎁`;
+
+    const set = (el, val) => {
+      const v = pad(val);
+      if (el.textContent !== v) { el.textContent = v; restart(el, 'tick'); }
+    };
+
+    const update = () => {
+      const ms = unlockDate - new Date();
+      if (ms <= 0) { window.location.reload(); return; }
+      const t = Math.floor(ms / 1000);
+      set(els.d, Math.floor(t / 86400));
+      set(els.h, Math.floor((t % 86400) / 3600));
+      set(els.m, Math.floor((t % 3600) / 60));
+      set(els.s, t % 60);
+    };
+
+    let bag = [];
+    $('#lockKnock').addEventListener('click', () => {
+      if (!bag.length) bag = shuffle(TEASES.slice());
+      tease.textContent = bag.pop();
+      restart(gift, 'is-shaking');
+    });
+
+    update();
+    setInterval(update, 1000);
+  }
+
+  /* ---------- 18. Start everything ---------- */
+  const unlockDate = new Date(CONFIG.unlockAt);
+  if (new Date() < unlockDate) {
+    document.documentElement.classList.add('is-locked');
+    initLock(unlockDate);
+    initBgHearts();
+    initClickSparkles();
+    return;
+  }
+  document.documentElement.classList.remove('is-locked');
+
   applyName();
   initTypewriter();
   initCountdown();

@@ -7,19 +7,48 @@
   <meta name="theme-color" content="#FFB6C1">
   <title>Happy Birthday 💖</title>
 
+  <!-- Lock: hide the surprise until Nov 10, 2026 00:00 Korea time (KST, UTC+9). Change the date in script.js CONFIG too. -->
+  <script>
+    if (new Date() < new Date('2026-11-10T00:00:00+09:00')) document.documentElement.classList.add('is-locked');
+  </script>
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Poppins:wght@300;400;500;600&family=Sacramento&display=swap" rel="stylesheet">
 
-  <link rel="stylesheet" href="styles.css?v=20261101">
+  <link rel="stylesheet" href="styles.css?v=20261109">
 
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js" defer></script>
-  <script src="script.js?v=20261101" defer></script>
+  <script src="script.js?v=20261109" defer></script>
 </head>
 <body>
 
   <!-- Floating hearts background (filled by script.js) -->
   <div class="bg-hearts" id="bgHearts" aria-hidden="true"></div>
+
+  <!-- Lock screen (shown until the unlock date) -->
+  <section class="lock-screen" id="lockScreen" aria-live="polite">
+    <div class="lock-card glass">
+      <div class="lock-gift" aria-hidden="true">
+        <span class="lock-bow">🎀</span>
+        <span class="lock-box">🎁</span>
+        <span class="lock-padlock">🔒</span>
+      </div>
+      <p class="hero-eyebrow">✨ a little surprise is waiting ✨</p>
+      <h1 class="lock-title"><span class="grad">Not yet, my love!</span></h1>
+      <p class="lock-sub">This gift unlocks on <strong id="lockDate">November 10, 2026</strong>. No peeking 🙈</p>
+
+      <div class="countdown">
+        <div class="time-box"><span class="time-num" id="lkDays">00</span><span class="time-unit">Days</span></div>
+        <div class="time-box"><span class="time-num" id="lkHours">00</span><span class="time-unit">Hours</span></div>
+        <div class="time-box"><span class="time-num" id="lkMinutes">00</span><span class="time-unit">Minutes</span></div>
+        <div class="time-box"><span class="time-num" id="lkSeconds">00</span><span class="time-unit">Seconds</span></div>
+      </div>
+
+      <button class="btn btn-ghost lock-knock" id="lockKnock" type="button">Knock knock 🚪</button>
+      <p class="lock-tease" id="lockTease"></p>
+    </div>
+  </section>
 
   <!-- Top navigation -->
   <nav class="nav glass" aria-label="Sections">
