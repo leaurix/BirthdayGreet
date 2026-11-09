@@ -981,6 +981,371 @@
       .forEach((section) => navObserver.observe(section));
   }
 
+  /* ---------- 16b. Memory match ---------- */
+  function initMatch() {
+    const grid = $('#matchGrid');
+    const movesEl = $('#matchMoves');
+    const pairsEl = $('#matchPairs');
+    const status = $('#matchStatus');
+    const EMOJIS = ['🐱', '🍓', '🧁', '🌸', '🎀', '🍰', '🧸', '💌'];
+    let first = null;
+    let lock = false;
+    let moves = 0;
+    let pairs = 0;
+
+    const hide = (c) => { c.classList.remove('is-flipped'); c.setAttribute('aria-label', 'Hidden card'); };
+
+    const build = () => {
+      first = null; lock = false; moves = 0; pairs = 0;
+      movesEl.textContent = '0';
+      pairsEl.textContent = '0';
+      status.textContent = '';
+      grid.innerHTML = '';
+      shuffle([...EMOJIS, ...EMOJIS]).forEach((e) => {
+        const card = document.createElement('button');
+        card.type = 'button';
+        card.className = 'match-card';
+        card.dataset.e = e;
+        card.setAttribute('aria-label', 'Hidden card');
+        card.innerHTML = `<span class="match-inner"><span class="match-face match-back">💗</span><span class="match-face match-front">${e}</span></span>`;
+        grid.appendChild(card);
+      });
+    };
+
+    grid.addEventListener('click', (ev) => {
+      const card = ev.target.closest('.match-card');
+      if (!card || lock || card === first || card.classList.contains('is-matched')) return;
+      card.classList.add('is-flipped');
+      card.setAttribute('aria-label', `Card ${card.dataset.e}`);
+      if (!first) { first = card; return; }
+
+      moves++;
+      movesEl.textContent = moves;
+      const a = first;
+      const b = card;
+      first = null;
+
+      if (a.dataset.e === b.dataset.e) {
+        a.classList.add('is-matched');
+        b.classList.add('is-matched');
+        pairs++;
+        pairsEl.textContent = pairs;
+        if (pairs === EMOJIS.length) {
+          status.textContent = `All pairs in ${moves} moves! You're a genius, my love 🧠💖`;
+          celebrate();
+        }
+      } else {
+        lock = true;
+        setTimeout(() => { hide(a); hide(b); lock = false; }, 800);
+      }
+    });
+
+    $('#matchReset').addEventListener('click', build);
+    build();
+  }
+
+  /* ---------- 16c. Scratch card ---------- */
+  function initScratch() {
+    const card = $('#scratchCard');
+    const canvas = $('#scratchCanvas');
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    const hint = $('#scratchHint');
+    const again = $('#scratchAgain');
+    const PRIZES = [
+      { e: '💐', t: 'A bouquet of flowers', s: 'Delivered with a big hug' },
+      { e: '🍦', t: 'Ice cream date', s: 'Any flavor, as many scoops as you want' },
+      { e: '🎮', t: 'Game night', s: 'I will let you win (maybe)' },
+      { e: '💆', t: 'A long massage', s: 'No time limit if you say please' },
+      { e: '🎬', t: 'Movie marathon', s: 'You pick every single movie' },
+      { e: '🍜', t: 'Your favorite food', s: 'My treat, anytime' },
+      { e: '🧸', t: 'A surprise gift', s: 'Coming soon to you' },
+      { e: '💋', t: 'Unlimited kisses', s: 'Valid forever' }
+    ];
+    let bag = [];
+    let drawing = false;
+    let started = false;
+    let done = false;
+    let last = null;
+    let moves = 0;
+
+    const setPrize = () => {
+      if (!bag.length) bag = shuffle(PRIZES.slice());
+      const p = bag.pop();
+      $('#scratchEmoji').textContent = p.e;
+      $('#scratchTitle').textContent = p.t;
+      $('#scratchSub').textContent = p.s;
+    };
+
+    const paint = () => {
+      const r = card.getBoundingClientRect();
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = Math.max(1, Math.round(r.width * dpr));
+      canvas.height = Math.max(1, Math.round(r.height * dpr));
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.globalCompositeOperation = 'source-over';
+
+      const g = ctx.createLinearGradient(0, 0, r.width, r.height);
+      g.addColorStop(0, '#F7D6D0');
+      g.addColorStop(0.5, '#E8B4B8');
+      g.addColorStop(1, '#B76E79');
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, r.width, r.height);
+
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.35)';
+      ctx.font = '18px sans-serif';
+      for (let i = 0; i < 16; i++) ctx.fillText('♥', rand(12, r.width - 12), rand(12, r.height - 12));
+      ctx.fillStyle = '#FFFFFF';
+      ctx.font = '700 24px Fredoka, sans-serif';
+      ctx.fillText('Scratch me ♥', r.width / 2, r.height / 2);
+
+      ctx.globalCompositeOperation = 'destination-out';
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.lineWidth = Math.max(28, r.width * 0.09);
+    };
+
+    const pos = (e) => {
+      const r = canvas.getBoundingClientRect();
+      return { x: e.clientX - r.left, y: e.clientY - r.top };
+    };
+
+    const scratchTo = (p) => {
+      ctx.beginPath();
+      if (last) {
+        ctx.moveTo(last.x, last.y);
+        ctx.lineTo(p.x, p.y);
+        ctx.stroke();
+      } else {
+        ctx.arc(p.x, p.y, ctx.lineWidth / 2, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      last = p;
+    };
+
+    const cleared = () => {
+      const d = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+      let clear = 0;
+      let total = 0;
+      for (let i = 3; i < d.length; i += 4 * 24) { total++; if (d[i] < 128) clear++; }
+      return total ? clear / total : 0;
+    };
+
+    const reveal = () => {
+      if (done) return;
+      done = true;
+      canvas.classList.add('is-done');
+      hint.textContent = 'You won! Screenshot it and send it to me 📸';
+      again.hidden = false;
+      burstAt(card, 70);
+    };
+
+    const check = () => { if (!done && cleared() > 0.5) reveal(); };
+
+    canvas.addEventListener('pointerdown', (e) => {
+      if (done) return;
+      drawing = true;
+      started = true;
+      last = null;
+      if (canvas.setPointerCapture) canvas.setPointerCapture(e.pointerId);
+      scratchTo(pos(e));
+    });
+    canvas.addEventListener('pointermove', (e) => {
+      if (!drawing) return;
+      scratchTo(pos(e));
+      if (++moves % 12 === 0) check();
+    });
+    const stop = () => { if (!drawing) return; drawing = false; last = null; check(); };
+    canvas.addEventListener('pointerup', stop);
+    canvas.addEventListener('pointercancel', stop);
+    canvas.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); reveal(); }
+    });
+
+    again.addEventListener('click', () => {
+      done = false;
+      started = false;
+      again.hidden = true;
+      hint.textContent = 'Scratch away ✨';
+      canvas.style.transition = 'none';
+      canvas.classList.remove('is-done');
+      paint();
+      void canvas.offsetWidth;
+      canvas.style.transition = '';
+      setPrize();
+    });
+
+    setPrize();
+    paint();
+    if ('ResizeObserver' in window) new ResizeObserver(() => { if (!started) paint(); }).observe(card);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { if (!started) paint(); });
+  }
+
+  /* ---------- 16d. Love coupons ---------- */
+  function initCoupons() {
+    const grid = $('#couponGrid');
+    const countEl = $('#couponCount');
+    const KEY = 'bday-coupons-claimed';
+    const COUPONS = [
+      { e: '🥞', t: 'Breakfast in bed', f: 'Pancakes, coffee, and me' },
+      { e: '🎬', t: 'Movie night', f: 'You pick, I bring snacks' },
+      { e: '🤗', t: 'One extra long hug', f: 'Minimum 60 seconds' },
+      { e: '💆', t: 'A relaxing massage', f: 'Shoulders, back, the works' },
+      { e: '👑', t: 'You are the boss today', f: 'Every decision is yours' },
+      { e: '🍫', t: 'Snack delivery', f: 'Your favorite treat, on demand' },
+      { e: '✨', t: 'Stargazing date', f: 'Blanket and cuddles included' },
+      { e: '🏆', t: 'Win any argument', f: 'Valid once, use it wisely' },
+      { e: '💌', t: 'A handwritten letter', f: 'Real paper, real feelings' },
+      { e: '🧺', t: 'Picnic date', f: 'I pack everything' },
+      { e: '🎮', t: 'All-night game session', f: 'Together until we fall asleep' },
+      { e: '😘', t: 'Kiss on demand', f: 'No questions asked' }
+    ];
+
+    let claimed = new Set();
+    try { claimed = new Set(JSON.parse(localStorage.getItem(KEY) || '[]')); } catch (e) { /* storage unavailable */ }
+    const save = () => { try { localStorage.setItem(KEY, JSON.stringify([...claimed])); } catch (e) { /* ignore */ } };
+    const updateCount = () => { countEl.textContent = claimed.size; };
+
+    $('#couponTotal').textContent = COUPONS.length;
+
+    COUPONS.forEach((c, i) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'coupon';
+      b.innerHTML = `<span class="coupon-emoji" aria-hidden="true">${c.e}</span><span><span class="coupon-title"></span><span class="coupon-fine"></span></span><span class="coupon-stamp" aria-hidden="true">CLAIMED</span>`;
+      b.querySelector('.coupon-title').textContent = c.t;
+      b.querySelector('.coupon-fine').textContent = c.f;
+
+      const sync = () => {
+        const on = claimed.has(i);
+        b.classList.toggle('is-claimed', on);
+        b.setAttribute('aria-pressed', String(on));
+      };
+
+      b.addEventListener('click', () => {
+        if (claimed.has(i)) claimed.delete(i);
+        else { claimed.add(i); burstAt(b, 30); }
+        save();
+        sync();
+        updateCount();
+      });
+
+      sync();
+      grid.appendChild(b);
+    });
+
+    updateCount();
+  }
+
+  /* ---------- 16e. Wish lanterns ---------- */
+  function initLanterns() {
+    const sky = $('#sky');
+    const form = $('#wishForm');
+    const input = $('#wishInput');
+    const countEl = $('#wishCount');
+    let count = 0;
+
+    const launch = (text) => {
+      const l = document.createElement('div');
+      l.className = 'lantern';
+      l.style.setProperty('--x', `${rand(12, 88)}%`);
+      l.style.setProperty('--drift', `${rand(-50, 50)}px`);
+      l.style.setProperty('--dur', `${text ? rand(9, 11) : rand(10, 15)}s`);
+      if (!text) l.style.setProperty('--s', rand(0.5, 0.85).toFixed(2));
+      l.innerHTML = '<span class="lantern-emoji">🏮</span>';
+      if (text) {
+        const t = document.createElement('span');
+        t.className = 'lantern-text';
+        t.textContent = text;
+        l.appendChild(t);
+      }
+      sky.appendChild(l);
+      l.addEventListener('animationend', (e) => { if (e.target === l) l.remove(); });
+    };
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const text = input.value.trim();
+      if (!text) { input.focus(); restart(input, 'nudge'); return; }
+      launch(text);
+      count++;
+      countEl.textContent = count;
+      input.value = '';
+      if (count === 1 || count % 3 === 0) burstAt(sky, 40);
+    });
+
+    if (reduceMotion) return;
+    for (let i = 0; i < 4; i++) setTimeout(() => launch(''), i * 700);
+    setInterval(() => { if (!document.hidden && sky.childElementCount < 10) launch(''); }, 2200);
+  }
+
+  /* ---------- 16f. Forever question ---------- */
+  function initForever() {
+    const stage = $('#foreverStage');
+    const yes = $('#yesBtn');
+    const no = $('#noBtn');
+    const q = $('#foreverQ');
+    const emoji = $('#foreverEmoji');
+    const btns = $('#foreverBtns');
+    const result = $('#foreverResult');
+    const LINES = [
+      'Are you sure? 🥺',
+      'Think again!',
+      'Wrong button 🙈',
+      'Nope, try the other one',
+      'This button is shy',
+      'Error 404: No not found',
+      'Just press Yes 💕'
+    ];
+    let tries = 0;
+
+    const run = () => {
+      tries++;
+      no.textContent = LINES[(tries - 1) % LINES.length];
+      yes.style.fontSize = `${Math.min(1.05 + tries * 0.12, 2.2)}rem`;
+
+      const s = stage.getBoundingClientRect();
+      if (!no.classList.contains('is-running')) {
+        const n0 = no.getBoundingClientRect();
+        no.style.left = `${n0.left - s.left}px`;
+        no.style.top = `${n0.top - s.top}px`;
+        no.classList.add('is-running');
+        void no.offsetWidth;
+      }
+
+      const n = no.getBoundingClientRect();
+      const y = yes.getBoundingClientRect();
+      const yl = y.left - s.left - 12;
+      const yr = y.right - s.left + 12;
+      const yt = y.top - s.top - 12;
+      const yb = y.bottom - s.top + 12;
+      let x;
+      let top;
+      let guard = 0;
+      do {
+        x = rand(10, Math.max(10, s.width - n.width - 10));
+        top = rand(10, Math.max(10, s.height - n.height - 10));
+        guard++;
+      } while (guard < 30 && x < yr && x + n.width > yl && top < yb && top + n.height > yt);
+
+      no.style.left = `${x}px`;
+      no.style.top = `${top}px`;
+    };
+
+    no.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') run(); });
+    no.addEventListener('click', (e) => { e.preventDefault(); run(); });
+
+    yes.addEventListener('click', () => {
+      btns.hidden = true;
+      emoji.textContent = '🥰';
+      q.textContent = 'I knew it! 💖';
+      result.hidden = false;
+      fireworks(4000);
+      celebrate();
+    });
+  }
+
   /* ---------- 17. Lock screen ---------- */
   function initLock(unlockDate) {
     const els = { d: $('#lkDays'), h: $('#lkHours'), m: $('#lkMinutes'), s: $('#lkSeconds') };
@@ -1044,6 +1409,11 @@
   initCake();
   initGame();
   initJar();
+  initMatch();
+  initScratch();
+  initCoupons();
+  initLanterns();
+  initForever();
   initBgHearts();
   initTrail();
   initClickSparkles();

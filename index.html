@@ -16,10 +16,10 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Poppins:wght@300;400;500;600&family=Sacramento&display=swap" rel="stylesheet">
 
-  <link rel="stylesheet" href="styles.css?v=20261109">
+  <link rel="stylesheet" href="styles.css?v=20261110">
 
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js" defer></script>
-  <script src="script.js?v=20261109" defer></script>
+  <script src="script.js?v=20261110" defer></script>
 </head>
 <body>
 
@@ -56,6 +56,11 @@
     <a href="#wish">Cake</a>
     <a href="#game">Game</a>
     <a href="#love">Love Notes</a>
+    <a href="#match">Match</a>
+    <a href="#scratch">Scratch</a>
+    <a href="#coupons">Coupons</a>
+    <a href="#wishes">Wishes</a>
+    <a href="#forever">Forever</a>
   </nav>
 
   <!-- 1. Hero header and greeting -->
@@ -188,6 +193,96 @@
         </div>
 
         <p class="jar-counter">You've opened <strong id="openCount">0</strong> love notes</p>
+      </div>
+    </section>
+
+    <!-- 6. Memory match -->
+    <section class="section" id="match">
+      <div class="section-head reveal">
+        <span class="section-kicker">Brain teaser</span>
+        <h2 class="section-title"><span class="grad">Match the Pairs</span> 🧩</h2>
+        <p class="section-text">Flip two cards at a time and find all 8 cute pairs.</p>
+      </div>
+
+      <div class="match-wrap glass reveal">
+        <div class="match-hud">
+          <div class="hud-pill">🔄 Moves: <strong id="matchMoves">0</strong></div>
+          <div class="hud-pill">💞 Pairs: <strong id="matchPairs">0</strong> / 8</div>
+        </div>
+        <div class="match-grid" id="matchGrid"></div>
+        <p class="match-status" id="matchStatus" aria-live="polite"></p>
+        <button class="btn btn-ghost" id="matchReset" type="button">Shuffle again 🔁</button>
+      </div>
+    </section>
+
+    <!-- 7. Scratch card -->
+    <section class="section" id="scratch">
+      <div class="section-head reveal">
+        <span class="section-kicker">Feeling lucky?</span>
+        <h2 class="section-title"><span class="grad">Scratch &amp; Win</span> 🎟️</h2>
+        <p class="section-text">Scratch the card with your finger or mouse to reveal your prize.</p>
+      </div>
+
+      <div class="scratch-stage glass reveal">
+        <div class="scratch-card" id="scratchCard">
+          <div class="scratch-prize">
+            <span class="scratch-emoji" id="scratchEmoji" aria-hidden="true">💐</span>
+            <p class="scratch-title" id="scratchTitle"></p>
+            <p class="scratch-sub" id="scratchSub"></p>
+          </div>
+          <canvas id="scratchCanvas" tabindex="0" aria-label="Scratch card. Drag to scratch, or press Enter to reveal."></canvas>
+        </div>
+        <p class="scratch-hint" id="scratchHint" aria-live="polite">Scratch away ✨</p>
+        <button class="btn btn-ghost" id="scratchAgain" type="button" hidden>New card 🎟️</button>
+      </div>
+    </section>
+
+    <!-- 8. Love coupons -->
+    <section class="section" id="coupons">
+      <div class="section-head reveal">
+        <span class="section-kicker">Redeem anytime</span>
+        <h2 class="section-title"><span class="grad">Love Coupons</span> 💝</h2>
+        <p class="section-text">Tap a coupon to claim it. Show it to me and I will make it happen.</p>
+      </div>
+
+      <div class="coupon-grid reveal" id="couponGrid"></div>
+      <p class="coupon-note">Claimed <strong id="couponCount">0</strong> of <span id="couponTotal">0</span> · tap again to unclaim</p>
+    </section>
+
+    <!-- 9. Wish lanterns -->
+    <section class="section" id="wishes">
+      <div class="section-head reveal">
+        <span class="section-kicker">Send it to the sky</span>
+        <h2 class="section-title"><span class="grad">Birthday Wish Lanterns</span> 🏮</h2>
+        <p class="section-text">Write a wish for your new year and let it float up into the stars.</p>
+      </div>
+
+      <div class="lantern-stage glass reveal">
+        <div class="sky" id="sky" aria-hidden="true"></div>
+        <form class="wish-form" id="wishForm">
+          <label class="sr-only" for="wishInput">Your wish</label>
+          <input id="wishInput" type="text" maxlength="80" placeholder="I wish..." autocomplete="off">
+          <button class="btn btn-primary" type="submit">Release 🏮</button>
+        </form>
+        <p class="wish-count" aria-live="polite">Wishes sent: <strong id="wishCount">0</strong></p>
+      </div>
+    </section>
+
+    <!-- 10. Forever question -->
+    <section class="section" id="forever">
+      <div class="section-head reveal">
+        <span class="section-kicker">One last question</span>
+        <h2 class="section-title"><span class="grad">Be mine forever?</span> 💞</h2>
+      </div>
+
+      <div class="forever-stage glass reveal" id="foreverStage">
+        <span class="forever-emoji" id="foreverEmoji" aria-hidden="true">🥺</span>
+        <p class="forever-q" id="foreverQ" aria-live="polite">Will you stay my favorite person forever?</p>
+        <div class="forever-btns" id="foreverBtns">
+          <button class="btn btn-primary" id="yesBtn" type="button">Yes 💖</button>
+          <button class="btn btn-ghost no-btn" id="noBtn" type="button">No</button>
+        </div>
+        <p class="forever-result" id="foreverResult" hidden>Then it's settled: you're stuck with me in every lifetime. Happy birthday, <span class="js-name">Esther</span>. I love you so much 💕</p>
       </div>
     </section>
 
